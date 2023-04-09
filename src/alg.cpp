@@ -40,7 +40,7 @@ std::string infx2pstfx(std::string fin) {
                     n += ' ';
                 }
                 stack1.pop();
-            } else if (priority(inf[i]) == -2
+            } else if (priority(fin[i]) == -2
                        && i != fin.size() - 1) {
                 int j;
                 for (j = i; priority(fin[j]) == -2; ++j) {
