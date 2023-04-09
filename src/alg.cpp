@@ -1,105 +1,94 @@
 // Copyright 2021 NNTU-CS
 #include <string>
 #include <map>
-#include "tstack.h"
+#include <tstack.h>
 
-int getPrior(char op) {
-    switch (op) {
-    case '(':
+int priority(char x) {
+    if (x == '(')
         return 0;
-    case ')':
+    else if (x == ')')
         return 1;
-    case '+':
+    else if (x == '+' || x == '-')
         return 2;
-    case '-':
-        return 2;
-    case '*':
+    else if (x == '*' || x == '/')
         return 3;
-    case '/':
-        return 3;
-    }
-    return -1;
+    else if (x == ' ')
+        return -1;
+    else
+        return -2;
 }
 
-std::string infx2pstfx(std::string inf) {
-    TStack<char, 100> stack1;
-    std::string str = "";
-    int result = 0;
-    for (char a : inf) {
-        bool truefalse = true;
-        if (getPrior(a) == 0) {
-            stack1.push(a);
-            truefalse = false;
-        }
-        if (getPrior(a) == -1) {
-            str = str + a;
-            str = str + ' ';
-            truefalse = false;
-        }
-        if (getPrior(a) > getPrior(stack1.get())) {
-            stack1.push(a);
-            truefalse = false;
-        }
-        if (stack1.isEmpty() && getPrior(a) != -1) {
-            stack1.push(a);
-            truefalse = false;
-        }
-        if (a != ')' && truefalse) {
-            while (getPrior(stack1.get()) >= getPrior(a)) {
-                str = str + stack1.pop();
-                str = str + ' ';
-            }
-            stack1.push(a);
-        }
-        if (a == ')') {
-            while (stack1.get() != '(') {
-                str = str + stack1.pop();
-                str = str + ' ';
-            }
-            stack1.pop();
-        }
-        if (result == inf.size() - 1) {
-            while (!stack1.isEmpty()) {
-                str = str + stack1.pop();
-                if (stack1.pri() != -1) {
-                    str = str + ' ';
+std::string infx2pstfx(std::string find) {
+  TStack<char, 100> stack1;
+    std::string N;
+    for (int i = 0; i < find.size(); ++i) {
+        if (priority(find[i]) == 0) {
+            stack1.push(find[i]);
+        } else if (priority(find[i]) > stack1.get()
+                   && !stack1.isEmpty()) {
+            stack1.push(find[i]);
+        } else if (stack1.isEmpty() && priority(find[i]) != -2) {
+            stack1.push(find[i]);
+        } else {
+            if (priority(find[i]) == 1) {
+                while (priority(stack1.get()) != 0) {
+                    N += stack1.pop();
+                    N += ' ';
                 }
+                stack1.pop();
+            } else if (priority(find[i]) == -2
+                       && i != find.size() - 1) {
+                int j;
+                for (j = i; priority(find[j]) == -2; ++j) {
+                    N += find[j];
+                }
+                i += j - i - 1;
+                N += ' ';
+            } else {
+                while (priority(stack1.get()) >=
+                       priority(find[i])
+                       && priority(find[i]) != -2) {
+                    N += stack1.pop();
+                    N += ' ';
+                }
+                stack1.push(inf[i]);
             }
         }
-        ++result;
+        if (i == inf.size() - 1) {
+            while (!stack1.isEmpty()) {
+                N += stack1.pop();
+                N += ' ';
+            }
+        }
     }
-    return str;
+    N.pop_back();
+    return N;
 }
 
-int eval(std::string post) {
-    TStack<int, 100> stack2;
-    for (char i : post) {
-        if (i == '+') {
-            int j = stack2.pop();
-            j = j + stack2.pop();
-            stack2.push(j);
-        }
-        if (i == '-') {
-            int j = stack2.pop();
-            j = stack2.pop() - j;
-            stack2.push(j);
-        }
-        if (i == '*') {
-            int j = stack2.pop();
-            j = j * stack2.pop();
-            stack2.push(j);
-        }
-        if (i == '/') {
-            int j = stack2.pop();
-            j = stack2.pop() / j;
-            stack2.push(j);
-        }
-        if (i == ' ') {
+int eval(std::string pref) {
+  TStack<int, 100> stack2;
+    for (char a : pref) {
+        if (isdigit(a)) {
+            stack2.push(a - '0');
+        } else if (a == ' ') {
             continue;
-        }
-        if ((i - '0') > 0) {
-            int j = i - '0';
-            stack2.push(j);
+        } else {
+            int second = stack2.pop();
+            int first = stack2.pop();
+            switch (a) {
+            case ('+'):
+                stack2.push(first + second);
+                break;
+            case ('-'):
+                stack2.push(first - second);
+                break;
+            case ('*'):
+                stack2.push(first * second);
+                break;
+            case ('/'):
+                stack2.push(first / second);
+                break;
+            }
         }
     }
     return stack2.get();
