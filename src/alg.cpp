@@ -79,7 +79,7 @@ int eval(std::string cr) {
         } else {
             int second = stack2.pop();
             int first = stack2.pop();
-            switch (symb) {
+            switch (cr) {
             case ('+'):
                 stack2.push(first + second);
                 break;
