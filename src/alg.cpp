@@ -3,16 +3,16 @@
 #include <map>
 #include "tstack.h"
 
-int getPrior(char op) {
-    switch (op) {
-    case '(':
-        return 0;
-    case ')':
-        return 1;
+int Prior(char c) {
+    switch (c) {
     case '+':
         return 2;
     case '-':
         return 2;
+    case '(':
+        return 0;
+    case ')':
+        return 1;
     case '*':
         return 3;
     case '/':
@@ -22,86 +22,73 @@ int getPrior(char op) {
 }
 
 std::string infx2pstfx(std::string inf) {
-    TStack<char, 100> stack1;
-    std::string str = "";
-    int result = 0;
-    for (char a : inf) {
-        bool truefalse = true;
-        if (getPrior(a) == 0) {
-            stack1.push(a);
-            truefalse = false;
-        }
-        if (getPrior(a) == -1) {
-            str = str + a;
-            str = str + ' ';
-            truefalse = false;
-        }
-        if (getPrior(a) > getPrior(stack1.get())) {
-            stack1.push(a);
-            truefalse = false;
-        }
-        if (stack1.isEmpty() && getPrior(a) != -1) {
-            stack1.push(a);
-            truefalse = false;
-        }
-        if (a != ')' && truefalse) {
-            while (getPrior(stack1.get()) >= getPrior(a)) {
-                str = str + stack1.pop();
-                str = str + ' ';
-            }
-            stack1.push(a);
-        }
-        if (a == ')') {
-            while (stack1.get() != '(') {
-                str = str + stack1.pop();
-                str = str + ' ';
-            }
-            stack1.pop();
-        }
-        if (result == inf.size() - 1) {
-            while (!stack1.isEmpty()) {
-                str = str + stack1.pop();
-                if (stack1.pri() != -1) {
-                    str = str + ' ';
+    std::string p;
+    TStack<char, 100> st;
+    for (int i = 0; i < inf.size(); i++) {
+        if ((inf[i] <= '9') && (inf[i] >= '0')) {
+            p += inf[i];
+            p += " ";
+        } else {
+            int k1 = Prior(inf[i]);
+            int k2 = Prior(st.get());
+            if (inf[i] == '(' || (k1 > k2) || st.isEmpty()) {
+                st.push(inf[i]);
+            } else if (inf[i] == ')') {
+                char a = st.pop();
+                while (a != '(') {
+                    p += a;
+                    p += " ";
+                    a = st.pop();
+                }
+            } else if (Prior(inf[i] <= st.get())) {
+                    while (Prior(inf[i] <= st.get()) && !st.isEmpty()) {
+                        char a = st.pop();
+                        p += a;
+                        p += " ";
+                    }
+                    st.push(inf[i]);
                 }
             }
         }
-        ++result;
+    while (!st.isEmpty()) {
+        char a = st.pop();
+            p += a;
+            p += " ";
     }
-    return str;
+    p.pop_back();
+    return p;
 }
 
-int eval(std::string post) {
-    TStack<int, 100> stack2;
-    for (char i : post) {
-        if (i == '+') {
-            int j = stack2.pop();
-            j = j + stack2.pop();
-            stack2.push(j);
-        }
-        if (i == '-') {
-            int j = stack2.pop();
-            j = stack2.pop() - j;
-            stack2.push(j);
-        }
-        if (i == '*') {
-            int j = stack2.pop();
-            j = j * stack2.pop();
-            stack2.push(j);
-        }
-        if (i == '/') {
-            int j = stack2.pop();
-            j = stack2.pop() / j;
-            stack2.push(j);
-        }
-        if (i == ' ') {
-            continue;
-        }
-        if ((i - '0') > 0) {
-            int j = i - '0';
-            stack2.push(j);
+int eval(std::string pref) {
+    TStack <int, 100> temp;
+    for (char a : pref) {
+        if (a == ' ')
+                continue;
+        if ((a <= '9') && (a >= '0')) {
+            int b = static_cast<int>(a - '0');
+                temp.push(b);
+        } else {
+            int znac;
+            int f = temp.get();
+            temp.pop();
+            int sec = temp.get();
+            temp.pop();
+            switch (a) {
+            case '+':
+                znac = sec + f;
+                break;
+            case '-':
+                znac = sec - f;
+                break;
+            case '*':
+                znac = sec * f;
+                break;
+            case '/':
+                znac = sec / f;
+                break;
+            }
+            temp.push(znac);
         }
     }
-    return stack2.get();
+    return temp.pop();
 }
-
