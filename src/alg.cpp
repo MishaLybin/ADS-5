@@ -4,22 +4,18 @@
 #include "tstack.h"
 
 int priority(char x) {
-    switch (x) {
-        case '(':
-            return 0;
-        case ')':
-            return 1;
-        case '+':
-            return 2;
-        case '-':
-            return 2;
-        case '*':
-            return 3;
-        case '/':
-            return 3;
-        default:
-            return -1;
-    }
+    if (x == '(')
+        return 0;
+    else if (x == ')')
+        return 1;
+    else if (x == '+' || x == '-')
+        return 2;
+    else if (x == '*' || x == '/')
+        return 3;
+    else if (x == ' ')
+        return -1;
+    else
+        return -2;
 }
 
 std::string infx2pstfx(std::string fin) {
