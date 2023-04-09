@@ -3,92 +3,122 @@
 #include <map>
 #include "tstack.h"
 
-int Prior(char c) {
-    switch (c) {
-    case '+':
-        return 2;
-    case '-':
-        return 2;
+
+int GetPrior(char ch) {
+    std::pair<char, int> prior[6];
+    switch (ch) {
     case '(':
-        return 0;
+        prior[0].first = '(';
+        prior[0].second = 0;
     case ')':
-        return 1;
+        prior[1].first = ')';
+        prior[1].second = 1;
+    case '+':
+        prior[2].first = '+';
+        prior[2].second = 2;
+    case '-':
+        prior[3].first = '-';
+        prior[3].second = 2;
     case '*':
-        return 3;
+        prior[4].first = '*';
+        prior[4].second = 3;
     case '/':
-        return 3;
+        prior[5].first = '/';
+        prior[5].second = 3;
     }
-    return -1;
+    int prior1 = -1;
+    for (int j = 0; j < 6; ++j) {
+        if (ch == prior[j].first) {
+            prior1 = prior[j].second;
+            break;
+        }
+    }
+    return prior1;
+}
+
+int count1(const int& n1, const int& n2, const int& oper) {
+    switch (oper) {
+        default:
+            break;
+        case '+': return n1 + n2;
+        case '-': return n1 - n2;
+        case '*': return n1 * n2;
+        case '/': return n1 / n2;
+    }
+    return 0;
+}
+
+std::string Space(const std::string& s) {
+  if (s.length() <= 2)
+    return s;
+  int n = 2 - s.length() % 2;
+  std::string r(s, 0, n);
+  for (auto i = s.begin() + n; i != s.end();) {
+    r += ' ';
+    r += *i++;
+  }
+  return r;
 }
 
 std::string infx2pstfx(std::string inf) {
-    std::string p;
-    TStack<char, 100> st;
-    for (int i = 0; i < inf.size(); i++) {
-        if ((inf[i] <= '9') && (inf[i] >= '0')) {
-            p += inf[i];
-            p += " ";
-        } else {
-            int k1 = Prior(inf[i]);
-            int k2 = Prior(st.get());
-            if (inf[i] == '(' || (k1 > k2) || st.isEmpty()) {
-                st.push(inf[i]);
-            } else if (inf[i] == ')') {
-                char a = st.pop();
-                while (a != '(') {
-                    p += a;
-                    p += " ";
-                    a = st.pop();
-                }
-            } else if (Prior(inf[i] <= st.get())) {
-                    while (Prior(inf[i] <= st.get()) && !st.isEmpty()) {
-                        char a = st.pop();
-                        p += a;
-                        p += " ";
-                    }
-                    st.push(inf[i]);
-                }
-            }
+  std::string pstfx;
+  TStack<char, 100> stChar;
+  for (auto& operation : inf) {
+    int priority = GetPrior(operation);
+    if (priority == -1) {
+      pstfx += operation;
+    } else {
+      if (stChar.get() < priority || priority == 0 || stChar.isEmpty()) {
+        stChar.push(operation);
+      } else if (operation == ')') {
+        char ch = stChar.get();
+        while (GetPrior(ch) >= priority) {
+          pstfx += ch;
+          stChar.pop();
+          ch = stChar.get();
         }
-    while (!st.isEmpty()) {
-        char a = st.pop();
-            p += a;
-            p += " ";
+        stChar.pop();
+      } else {
+        char ch = stChar.get();
+        while (GetPrior(ch) >= priority) {
+          pstfx += ch;
+          stChar.pop();
+          ch = stChar.get();
+        }
+        stChar.push(operation);
+      }
     }
-    p.pop_back();
-    return p;
+  }
+  while (!stChar.isEmpty()) {
+    pstfx += stChar.get();
+    stChar.pop();
+  }
+  pstfx = Space(pstfx);
+  return pstfx;
 }
 
-int eval(std::string pref) {
-    TStack <int, 100> temp;
-    for (char a : pref) {
-        if (a == ' ')
+  int eval(std::string prf) {
+    TStack <int, 100> stInt;
+    std::string r = "";
+    for (size_t i = 0; i < prf.size(); i++) {
+        if (GetPrior(prf[i]) == -1) {
+            if (prf[i] == ' ') {
                 continue;
-        if ((a <= '9') && (a >= '0')) {
-            int b = static_cast<int>(a - '0');
-                temp.push(b);
-        } else {
-            int znac;
-            int f = temp.get();
-            temp.pop();
-            int sec = temp.get();
-            temp.pop();
-            switch (a) {
-            case '+':
-                znac = sec + f;
-                break;
-            case '-':
-                znac = sec - f;
-                break;
-            case '*':
-                znac = sec * f;
-                break;
-            case '/':
-                znac = sec / f;
-                break;
+            } else if (isdigit(prf[i + 1])) {
+                r += prf[i];
+                continue;
+            } else {
+                r += prf[i];
+                stInt.push(atoi(r.c_str()));
+                r = "";
             }
-            temp.push(znac);
+        } else {
+          int b = stInt.get();
+          stInt.pop();
+          int a = stInt.get();
+          stInt.pop();
+          stInt.push(count1(a, b, prf[i]));
         }
-    }
-    return temp.pop();
+  }
+  return stInt.get();
 }
