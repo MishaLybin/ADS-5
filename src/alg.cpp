@@ -26,32 +26,32 @@ std::string infx2pstfx(std::string fin) {
   TStack<char, 100> stack1;
     std::string n;
     for (int i = 0; i < fin.size(); ++i) {
-        if (PriorityOfOperator(fin[i]) == 0) {
+        if (priority(fin[i]) == 0) {
             stack1.push(fin[i]);
-        } else if (PriorityOfOperator(fin[i]) > stack1.get()
+        } else if (priority(fin[i]) > stack1.get()
                    && !stack1.isEmpty()) {
             stack1.push(fin[i]);
-        } else if (stack1.isEmpty() && PriorityOfOperator(fin[i]) != -2) {
+        } else if (stack1.isEmpty() && priority(fin[i]) != -2) {
             stack1.push(fin[i]);
         } else {
-            if (PriorityOfOperator(fin[i]) == 1) {
-                while (PriorityOfOperator(stack1.get()) != 0) {
+            if (priority(fin[i]) == 1) {
+                while (priority(stack1.get()) != 0) {
                     n += stack1.pop();
                     n += ' ';
                 }
                 stack1.pop();
-            } else if (PriorityOfOperator(inf[i]) == -2
+            } else if (priority(inf[i]) == -2
                        && i != fin.size() - 1) {
                 int j;
-                for (j = i; PriorityOfOperator(fin[j]) == -2; ++j) {
+                for (j = i; priority(fin[j]) == -2; ++j) {
                     n += fin[j];
                 }
                 i += j - i - 1;
                 n += ' ';
             } else {
-                while (PriorityOfOperator(stack1.get()) >=
-                       PriorityOfOperator(fin[i])
-                       && PriorityOfOperator(fin[i]) != -2) {
+                while (priority(stack1.get()) >=
+                       priority(fin[i])
+                       && priority(fin[i]) != -2) {
                     n += stack1.pop();
                     n += ' ';
                 }
