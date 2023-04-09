@@ -18,64 +18,64 @@ int priority(char x) {
         return -2;
 }
 
-std::string infx2pstfx(std::string fin) {
+std::string infx2pstfx(std::string inf) {
   TStack<char, 100> stack1;
-    std::string n;
-    for (int i = 0; i < fin.size(); ++i) {
-        if (priority(fin[i]) == 0) {
-            stack1.push(fin[i]);
-        } else if (priority(fin[i]) > stack1.get()
+    std::string N;
+    for (int i = 0; i < inf.size(); ++i) {
+        if (priority(inf[i]) == 0) {
+            stack1.push(inf[i]);
+        } else if (priority(inf[i]) > stack1.get()
                    && !stack1.isEmpty()) {
-            stack1.push(fin[i]);
-        } else if (stack1.isEmpty() && priority(fin[i]) != -2) {
-            stack1.push(fin[i]);
+            stack1.push(inf[i]);
+        } else if (stack1.isEmpty() && priority(inf[i]) != -2) {
+            stack1.push(inf[i]);
         } else {
-            if (priority(fin[i]) == 1) {
+            if (priority(inf[i]) == 1) {
                 while (priority(stack1.get()) != 0) {
-                    n += stack1.pop();
-                    n += ' ';
+                    N += stack1.pop();
+                    N += ' ';
                 }
                 stack1.pop();
-            } else if (priority(fin[i]) == -2
-                       && i != fin.size() - 1) {
+            } else if (priority(inf[i]) == -2
+                       && i != inf.size() - 1) {
                 int j;
-                for (j = i; priority(fin[j]) == -2; ++j) {
-                    n += fin[j];
+                for (j = i; priority(inf[j]) == -2; ++j) {
+                    N += inf[j];
                 }
                 i += j - i - 1;
-                n += ' ';
+                N += ' ';
             } else {
                 while (priority(stack1.get()) >=
-                       priority(fin[i])
-                       && priority(fin[i]) != -2) {
-                    n += stack1.pop();
-                    n += ' ';
+                       priority(inf[i])
+                       && priority(inf[i]) != -2) {
+                    N += stack1.pop();
+                    N += ' ';
                 }
-                stack1.push(fin[i]);
+                stack1.push(inf[i]);
             }
         }
-        if (i == fin.size() - 1) {
+        if (i == inf.size() - 1) {
             while (!stack1.isEmpty()) {
-                n += stack1.pop();
-                n += ' ';
+                N += stack1.pop();
+                N += ' ';
             }
         }
     }
-    n.pop_back();
-    return n;
+    N.pop_back();
+    return N;
 }
 
-int eval(std::string cr) {
+int eval(std::string pref) {
   TStack<int, 100> stack2;
-    for (char a : cr) {
-        if (isdigit(a)) {
-            stack2.push(a - '0');
-        } else if (a == ' ') {
+    for (char symb : pref) {
+        if (isdigit(symb)) {
+            stack2.push(symb - '0');
+        } else if (symb == ' ') {
             continue;
         } else {
             int second = stack2.pop();
             int first = stack2.pop();
-            switch (cr) {
+            switch (symb) {
             case ('+'):
                 stack2.push(first + second);
                 break;
